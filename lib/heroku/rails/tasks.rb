@@ -114,7 +114,7 @@ namespace :heroku do
   desc "Opens a remote console"
   task :console do
     HEROKU_RUNNER.each_heroku_app do |heroku_env, app_name, repo|
-      system_with_echo "heroku console --app #{app_name}"
+      system_with_echo "heroku run console --app #{app_name}"
     end
   end
 
