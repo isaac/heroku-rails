@@ -191,20 +191,27 @@ namespace :heroku do
       end
     end
 
-    desc "Pulls the database from heroku and stores it into db/dumps/"
+    desc "Pulls the database from heroku and stores it into db/backups/"
     task :pull do
       HEROKU_RUNNER.each_heroku_app do |heroku_env, app_name, repo|
-        system_with_echo "heroku pgdumps:capture --app #{app_name}"
-        dump = `heroku pgdumps --app #{app_name}`.split("\n").last.split(" ").first
-        system_with_echo "mkdir -p #{HerokuRails::Config.root}/db/dumps"
-        file = "#{HerokuRails::Config.root}/db/dumps/#{dump}.sql.gz"
-        url = `heroku pgdumps:url --app #{app_name} #{dump}`.chomp
+        system_with_echo "heroku pgbackups:capture --expire --app #{app_name}"
+        backup = `heroku pgbackups --app #{app_name}`.split("\n").last.split(" ").first
+        system_with_echo "mkdir -p #{HerokuRails::Config.root}/db/backups/#{heroku_env}"
+        file = "#{HerokuRails::Config.root}/db/backups/#{heroku_env}/#{backup}.dump"
+        url = `heroku pgbackups:url --app #{app_name} #{backup}`.chomp
         system_with_echo "wget", url, "-O", file
+        system_with_echo "rake db:drop db:create"
+        system_with_echo "pg_restore --verbose --clean --no-acl --no-owner -h localhost -d #{app_name} #{file}"
+      end
+    end
 
-        # TODO: these are a bit distructive...
-        # system_with_echo "rake db:drop db:create"
-        # system_with_echo "gunzip -c #{file} | #{HerokuRails::Config.root}/script/dbconsole"
-        # system_with_echo "rake jobs:clear"
+    task :transfer do
+      HEROKU_RUNNER.each_heroku_app do |heroku_env, app_name, repo|      
+        production = HEROKU_CONFIG.apps["production"]
+        next if app_name == production
+        system_with_echo "heroku pgbackups:capture --expire --app #{production}"
+        url = `heroku pgbackups:url --app #{production}`.chomp
+        system_with_echo "heroku pgbackups:restore DATABASE '#{url}' --app #{app_name} --confirm #{app_name}"
       end
     end
   end
