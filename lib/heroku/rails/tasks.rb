@@ -201,7 +201,7 @@ namespace :heroku do
         url = `heroku pgbackups:url --app #{app_name} #{backup}`.chomp
         system_with_echo "wget", url, "-O", file
         system_with_echo "rake db:drop db:create"
-        system_with_echo "pg_restore --verbose --clean --no-acl --no-owner -h localhost -d #{app_name} #{file}"
+        system_with_echo "pg_restore --verbose --clean --no-acl --no-owner -h localhost -d #{app_name}_development #{file}"
       end
     end
 
