@@ -215,4 +215,18 @@ namespace :heroku do
       end
     end
   end
+
+  namespace :maintenance do
+    task :on do
+      HEROKU_RUNNER.each_heroku_app do |heroku_env, app_name, repo|
+        system_with_echo "heroku maintenance:on --app #{app_name}"
+      end
+    end
+
+    task :off do
+      HEROKU_RUNNER.each_heroku_app do |heroku_env, app_name, repo|
+        system_with_echo "heroku maintenance:off --app #{app_name}"
+      end
+    end
+  end
 end
