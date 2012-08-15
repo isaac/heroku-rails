@@ -114,8 +114,7 @@ namespace :heroku do
   desc "Opens a remote console"
   task :console do
     HEROKU_RUNNER.each_heroku_app do |heroku_env, app_name, repo|
-      console = HEROKU_CONFIG.stack(heroku_env) == "cedar" ? "run console" : "console"
-      system_with_echo "heroku #{console} --app #{app_name}"
+      system_with_echo "heroku run console --app #{app_name}"
     end
   end
 
@@ -187,7 +186,7 @@ namespace :heroku do
     desc "Migrates and restarts remote servers"
     task :migrate do
       HEROKU_RUNNER.each_heroku_app do |heroku_env, app_name, repo|
-        system_with_echo "heroku rake --app #{app_name} db:migrate && heroku restart --app #{app_name}"
+        system_with_echo "heroku run rake --app #{app_name} db:migrate && heroku restart --app #{app_name}"
       end
     end
 
