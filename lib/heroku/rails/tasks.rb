@@ -135,7 +135,7 @@ namespace :heroku do
   desc "Shows the Heroku config environment variables"
   task :config do
     HEROKU_RUNNER.each_heroku_app do |heroku_env, app_name, repo|
-      system_with_echo "heroku config --long --app #{app_name}"
+      system_with_echo "heroku config --app #{app_name}"
     end
   end
 
